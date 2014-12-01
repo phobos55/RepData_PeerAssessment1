@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<title>Reproducible Research: Peer Assessment 1</title>
+
+<script src="PA1_template_files/jquery-1.11.0/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="PA1_template_files/bootstrap-2.3.2/css/bootstrap.min.css" rel="stylesheet" />
+<link href="PA1_template_files/bootstrap-2.3.2/css/bootstrap-responsive.min.css" rel="stylesheet" />
+<script src="PA1_template_files/bootstrap-2.3.2/js/bootstrap.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<link rel="stylesheet"
+      href="PA1_template_files/highlight/default.css"
+      type="text/css" />
+<script src="PA1_template_files/highlight/highlight.js"></script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+<div class="container-fluid main-container">
+
+
+<div id="header">
+<h1 class="title">Reproducible Research: Peer Assessment 1</h1>
+</div>
+
+
+<div id="loading-and-preprocessing-the-data" class="section level2">
+<h2>Loading and preprocessing the data</h2>
+<pre class="r"><code>data &lt;- read.csv(&quot;activity.csv&quot;)
+Data &lt;- data[which(data$steps!= &quot;NA&quot;), ]
+DataF &lt;- aggregate(steps ~ date, data = Data, sum)</code></pre>
+</div>
+<div id="what-is-mean-total-number-of-steps-taken-per-day" class="section level2">
+<h2>What is mean total number of steps taken per day?</h2>
+<pre class="r"><code>hist(DataF$steps,main=&quot;Histogram of Steps&quot;,xlab=&quot;Steps&quot;)</code></pre>
+<p><img src="PA1_template_files/figure-html/unnamed-chunk-2-1.png" /></p>
+<ul>
+<li>The mean of steps per day is <strong>1.076618910^{4}</strong><br /></li>
+<li>The median of steps per day is <strong>10765</strong></li>
+</ul>
+</div>
+<div id="what-is-the-average-daily-activity-pattern" class="section level2">
+<h2>What is the average daily activity pattern?</h2>
+<div id="make-a-time-series-plot-i.e.type-l-of-the-5-minute-interval-x-axis-and-the-average-number-of-steps-taken-averaged-across-all-days-y-axis" class="section level4">
+<h4>Make a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)</h4>
+<pre class="r"><code>SInterval&lt;-aggregate(steps~interval,data=Data,mean)
+plot(steps~interval,data=SInterval,type=&quot;l&quot;)</code></pre>
+<p><img src="PA1_template_files/figure-html/unnamed-chunk-3-1.png" /></p>
+<ul>
+<li>Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?<br />The interval with maximum number of steps is <strong>835 th</strong> interval</li>
+</ul>
+</div>
+</div>
+<div id="imputing-missing-values" class="section level2">
+<h2>Imputing missing values</h2>
+<div id="calculate-and-report-the-total-number-of-missing-values-in-the-dataset" class="section level4">
+<h4>Calculate and report the total number of missing values in the dataset</h4>
+<ul>
+<li>The total de missing value is <strong>2304</strong></li>
+</ul>
+</div>
+<div id="devise-a-strategy-for-filling-in-all-of-the-missing-values-in-the-dataset.-create-a-new-dataset-that-is-equal-to-the-original-dataset-but-with-the-missing-data-filled-in" class="section level4">
+<h4>Devise a strategy for filling in all of the missing values in the dataset. Create a new dataset that is equal to the original dataset but with the missing data filled in</h4>
+<pre class="r"><code>Sintervals&lt;-function(interval){
+        SInterval[SInterval$interval==interval,]$steps
+}
+countInterval=0
+for(n in 1:nrow(data)){
+        if(is.na(data[n,]$steps)){
+                data[n,]$steps&lt;-Sintervals(data[n,]$interval)
+                countInterval=countInterval + 1
+        }
+}</code></pre>
+<ul>
+<li>The total of NA values were filled is <strong>2304</strong></li>
+</ul>
+</div>
+<div id="make-a-histogram-of-the-total-number-of-steps-taken-each-day-and-calculate-and-report-the-mean-and-median-total-number-of-steps-taken-per-day" class="section level4">
+<h4>Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day</h4>
+<pre class="r"><code>totalSteps&lt;- aggregate(steps ~ date, data = data, sum)
+hist(totalSteps$steps)</code></pre>
+<p><img src="PA1_template_files/figure-html/unnamed-chunk-5-1.png" /></p>
+<ul>
+<li>The mean total number of steps taken per day is <strong>1.076610^{4}</strong><br /></li>
+<li>The median total number of steps taken per day is <strong>1.076610^{4}</strong></li>
+</ul>
+</div>
+</div>
+<div id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends" class="section level2">
+<h2>Are there differences in activity patterns between weekdays and weekends?</h2>
+<div id="create-a-new-factor-variable-in-the-dataset-with-two-levels-weekday-and-weekend-indicating-whether-a-given-date-is-a-weekday-or-weekend-day." class="section level4">
+<h4>Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.</h4>
+<pre class="r"><code>data$day=ifelse(as.POSIXlt(as.Date(data$date))$wday%%6==0,&quot;weekend&quot;,&quot;weekday&quot;)
+data$day=factor(data$day,levels=c(&quot;weekday&quot;,&quot;weeked&quot;))</code></pre>
+</div>
+<div id="make-a-panel-plot-containing-a-time-series-plot-i.e.type-l-of-the-5-minute-interval-x-axis-and-the-average-number-of-steps-taken-averaged-across-all-weekday-days-or-weekend-days-y-axis." class="section level4">
+<h4>Make a panel plot containing a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).</h4>
+<pre class="r"><code>sInterval=aggregate(steps~interval+day,data,mean)
+library(lattice)
+xyplot(steps~interval|factor(day),data=sInterval,aspect=1/2,type = &quot;l&quot;)</code></pre>
+<p><img src="PA1_template_files/figure-html/unnamed-chunk-7-1.png" /></p>
+</div>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
